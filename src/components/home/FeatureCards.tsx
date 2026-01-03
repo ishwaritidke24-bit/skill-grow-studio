@@ -47,27 +47,31 @@ const FeatureCards = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
           {features.map((feature, index) => (
-            <div
+            <Link
               key={feature.title}
-              className={`card-elevated p-8 flex flex-col bg-gradient-to-br ${feature.gradient}`}
+              to={feature.link}
+              className={`card-elevated p-8 flex flex-col bg-gradient-to-br ${feature.gradient} group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`}
               style={{ animationDelay: `${index * 100}ms` }}
+              aria-label={`${feature.title} - ${feature.description}`}
             >
-              <div className={`w-14 h-14 rounded-2xl ${feature.iconBg} flex items-center justify-center mb-6`}>
+              <div className={`w-14 h-14 rounded-2xl ${feature.iconBg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                 <feature.icon className="w-7 h-7 text-primary-foreground" />
               </div>
               
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">{feature.title}</h3>
               <p className="text-muted-foreground mb-6 flex-grow">
                 {feature.description}
               </p>
               
-              <Link to={feature.link}>
-                <Button variant="outline" className="w-full group">
-                  {feature.cta}
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-            </div>
+              <Button 
+                variant="outline" 
+                className="w-full group/btn min-h-[44px]"
+                tabIndex={-1}
+              >
+                {feature.cta}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            </Link>
           ))}
         </div>
       </div>
