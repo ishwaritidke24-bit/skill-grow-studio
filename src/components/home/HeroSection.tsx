@@ -9,11 +9,10 @@ const HeroSection = () => {
           {/* Left Content */}
           <div className="space-y-8 animate-fade-in">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-                Your Career{" "}
-                <span className="text-gradient">Playground</span>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                Your <span className="text-gradient">Careerly</span>
                 <br />
-                Awaits
+                Journey Awaits
               </h1>
               <p className="text-lg text-muted-foreground max-w-lg">
                 AI-powered career support that matches you with perfect opportunities, 
