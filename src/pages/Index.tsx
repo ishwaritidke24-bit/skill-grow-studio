@@ -94,7 +94,7 @@ const Index = () => {
         <div className="section-container">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Career Playground. Powered by AI.
+              © 2026 Careerly. Powered by AI.
             </p>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
