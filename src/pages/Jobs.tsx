@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Navbar from "@/components/layout/Navbar";
 import JobCard from "@/components/jobs/JobCard";
 import { Search, MapPin, Filter, ChevronLeft, ChevronRight } from "lucide-react";
@@ -84,6 +84,25 @@ const allJobs = [
     skills: ["Copywriting", "SEO", "Social Media"],
     postedTime: "1 week ago",
   },
+  {
+    title: "Mobile Developer",
+    company: "AppWorks",
+    location: "Hybrid - Mumbai",
+    salary: "15-22 LPA",
+    type: "Full-time",
+    skills: ["React Native", "iOS", "Android", "TypeScript"],
+    isAiMatch: true,
+    postedTime: "6 hours ago",
+  },
+  {
+    title: "HR Intern",
+    company: "TalentFirst",
+    location: "Noida, UP",
+    salary: "15K/month",
+    type: "Internship",
+    skills: ["Recruitment", "HR Operations", "Excel"],
+    postedTime: "2 days ago",
+  },
 ];
 
 const filters = ["All Jobs", "Remote", "On-site", "Hybrid", "Internship", "Full-time"];
@@ -95,20 +114,96 @@ const Jobs = () => {
   const [sortBy, setSortBy] = useState("Most Relevant");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Functional filtering logic
+  const filteredJobs = useMemo(() => {
+    let jobs = [...allJobs];
+
+    // Apply filter
+    switch (activeFilter) {
+      case "Remote":
+        jobs = jobs.filter((job) => job.location.toLowerCase().includes("remote"));
+        break;
+      case "On-site":
+        jobs = jobs.filter(
+          (job) =>
+            !job.location.toLowerCase().includes("remote") &&
+            !job.location.toLowerCase().includes("hybrid")
+        );
+        break;
+      case "Hybrid":
+        jobs = jobs.filter((job) => job.location.toLowerCase().includes("hybrid"));
+        break;
+      case "Internship":
+        jobs = jobs.filter((job) => job.type === "Internship");
+        break;
+      case "Full-time":
+        jobs = jobs.filter((job) => job.type === "Full-time");
+        break;
+      default:
+        break;
+    }
+
+    // Apply search query (title, company, skills)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      jobs = jobs.filter(
+        (job) =>
+          job.title.toLowerCase().includes(query) ||
+          job.company.toLowerCase().includes(query) ||
+          job.skills.some((skill) => skill.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply location query
+    if (locationQuery.trim()) {
+      const locQuery = locationQuery.toLowerCase();
+      jobs = jobs.filter((job) => job.location.toLowerCase().includes(locQuery));
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "Latest First":
+        // Sort by posted time (simplified - assuming "hours ago" < "days ago" < "week ago")
+        jobs.sort((a, b) => {
+          const getTimeValue = (time: string) => {
+            if (time.includes("hour")) return 1;
+            if (time.includes("day")) return parseInt(time) * 24;
+            if (time.includes("week")) return parseInt(time) * 24 * 7;
+            return 100;
+          };
+          return getTimeValue(a.postedTime || "") - getTimeValue(b.postedTime || "");
+        });
+        break;
+      case "Highest Salary":
+        jobs.sort((a, b) => {
+          const getSalaryValue = (salary: string) => {
+            const match = salary.match(/(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+          };
+          return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+        });
+        break;
+      default:
+        // Most Relevant - AI matches first
+        jobs.sort((a, b) => (b.isAiMatch ? 1 : 0) - (a.isAiMatch ? 1 : 0));
+    }
+
+    return jobs;
+  }, [activeFilter, searchQuery, locationQuery, sortBy]);
+
   const handleSearch = () => {
-    toast.success("Searching jobs...", {
+    toast.success(`Found ${filteredJobs.length} jobs`, {
       description: `${searchQuery || "All jobs"} ${locationQuery ? `in ${locationQuery}` : ""}`,
     });
   };
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
-    toast.info(`Filter applied: ${filter}`);
+    setCurrentPage(1);
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(e.target.value);
-    toast.info(`Sorting by: ${e.target.value}`);
   };
 
   const handleLoadMore = () => {
@@ -119,13 +214,11 @@ const Jobs = () => {
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
-      toast.info(`Page ${currentPage - 1}`);
     }
   };
 
   const handleNextPage = () => {
     setCurrentPage((prev) => prev + 1);
-    toast.info(`Page ${currentPage + 1}`);
   };
 
   return (
@@ -186,6 +279,11 @@ const Jobs = () => {
                   aria-pressed={activeFilter === filter}
                 >
                   {filter}
+                  {activeFilter === filter && filter !== "All Jobs" && (
+                    <span className="ml-1.5 text-xs opacity-80">
+                      ({filteredJobs.length})
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -194,7 +292,10 @@ const Jobs = () => {
           {/* Results Count */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <p className="text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{allJobs.length}</span> jobs
+              Showing <span className="font-semibold text-foreground">{filteredJobs.length}</span> jobs
+              {activeFilter !== "All Jobs" && (
+                <span className="text-primary ml-1">• {activeFilter}</span>
+              )}
             </p>
             <select 
               className="search-input w-auto py-2 min-h-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -209,69 +310,92 @@ const Jobs = () => {
           </div>
 
           {/* Job Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {allJobs.map((job, index) => (
-              <div
-                key={index}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <JobCard {...job} />
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
-            <Button 
-              variant="outline" 
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              className="min-h-[44px]"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              {[1, 2, 3].map((page) => (
-                <button
-                  key={page}
-                  onClick={() => {
-                    setCurrentPage(page);
-                    toast.info(`Page ${page}`);
-                  }}
-                  className={`w-10 h-10 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                    currentPage === page
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                  }`}
-                  aria-label={`Page ${page}`}
-                  aria-current={currentPage === page ? "page" : undefined}
+          {filteredJobs.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              {filteredJobs.map((job, index) => (
+                <div
+                  key={index}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {page}
-                </button>
+                  <JobCard {...job} />
+                </div>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-16 bg-card rounded-2xl border border-border/50">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your filters or search terms
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setActiveFilter("All Jobs");
+                  setSearchQuery("");
+                  setLocationQuery("");
+                }}
+              >
+                Clear all filters
+              </Button>
+            </div>
+          )}
 
-            <Button 
-              variant="outline" 
-              onClick={handleNextPage}
-              className="min-h-[44px]"
-              aria-label="Next page"
-            >
-              Next
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
+          {/* Pagination */}
+          {filteredJobs.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
+              <Button 
+                variant="outline" 
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className="min-h-[44px]"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                {[1, 2, 3].map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                      currentPage === page
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                    }`}
+                    aria-label={`Page ${page}`}
+                    aria-current={currentPage === page ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <Button 
+                variant="outline" 
+                onClick={handleNextPage}
+                className="min-h-[44px]"
+                aria-label="Next page"
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          )}
 
           {/* Load More */}
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg" onClick={handleLoadMore} className="min-h-[44px]">
-              Load More Jobs
-            </Button>
-          </div>
+          {filteredJobs.length > 0 && (
+            <div className="text-center mt-8">
+              <Button variant="outline" size="lg" onClick={handleLoadMore} className="min-h-[44px]">
+                Load More Jobs
+              </Button>
+            </div>
+          )}
         </div>
       </main>
     </div>
