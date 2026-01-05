@@ -145,20 +145,20 @@ const JobCard = ({
         </div>
 
         {/* CTAs */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button 
             variant="outline" 
-            className="flex-1 group/btn min-h-[44px]"
+            className="flex-1 group/btn min-h-[44px] text-sm"
             onClick={(e) => {
               e.stopPropagation();
               setIsDetailsModalOpen(true);
             }}
           >
             View Details
-            <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+            <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover/btn:translate-x-1" />
           </Button>
           <Button 
-            className="flex-1 min-h-[44px]"
+            className="flex-1 min-h-[44px] text-sm"
             onClick={handleApplyNow}
           >
             Apply Now

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Briefcase, User, Menu, X } from "lucide-react";
 import AuthModal from "@/components/ui/AuthModal";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -60,8 +61,9 @@ const Navbar = () => {
               })}
             </nav>
 
-            {/* Desktop Profile & Mobile Menu Toggle */}
-            <div className="flex items-center gap-3">
+            {/* Desktop Profile, Theme Toggle & Mobile Menu Toggle */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 hover:scale-105 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
