@@ -61,7 +61,7 @@ const JobCard = ({
   return (
     <>
       <div 
-        className="card-elevated p-6 flex flex-col h-full cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        className="card-elevated p-4 lg:p-5 flex flex-col h-full cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         onClick={handleCardClick}
         onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
         tabIndex={0}
@@ -106,33 +106,33 @@ const JobCard = ({
         </div>
 
         {/* Job Info */}
-        <div className="flex-grow">
-          <h3 className="text-lg font-semibold mb-1 text-foreground group-hover:text-primary transition-colors">
+        <div className="flex-grow min-h-0">
+          <h3 className="text-base lg:text-lg font-semibold mb-1 text-foreground group-hover:text-primary transition-colors line-clamp-2">
             {title}
           </h3>
-          <p className="text-primary font-medium mb-3">{company}</p>
+          <p className="text-primary font-medium mb-2 text-sm">{company}</p>
 
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="w-4 h-4 shrink-0" />
-              <span>{location}</span>
+          <div className="space-y-1.5 mb-3 text-xs lg:text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{location}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <IndianRupee className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <IndianRupee className="w-3.5 h-3.5 shrink-0" />
               <span>{salary}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-3.5 h-3.5 shrink-0" />
               <span>{type} • {postedTime}</span>
             </div>
           </div>
 
           {/* Skills */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {skills.slice(0, 4).map((skill) => (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {skills.slice(0, 3).map((skill) => (
               <span 
                 key={skill} 
-                className="skill-tag cursor-pointer hover:bg-primary/20 transition-colors"
+                className="skill-tag text-xs cursor-pointer hover:bg-primary/20 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   toast.info(`Searching for ${skill} jobs...`);
@@ -141,27 +141,32 @@ const JobCard = ({
                 {skill}
               </span>
             ))}
+            {skills.length > 3 && (
+              <span className="skill-tag text-xs">+{skills.length - 3}</span>
+            )}
           </div>
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
           <Button 
             variant="outline" 
-            className="flex-1 group/btn min-h-[44px] text-sm"
+            size="sm"
+            className="group/btn min-h-[40px] text-xs lg:text-sm px-2"
             onClick={(e) => {
               e.stopPropagation();
               setIsDetailsModalOpen(true);
             }}
           >
-            View Details
-            <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover/btn:translate-x-1" />
+            Details
+            <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover/btn:translate-x-1" />
           </Button>
           <Button 
-            className="flex-1 min-h-[44px] text-sm"
+            size="sm"
+            className="min-h-[40px] text-xs lg:text-sm px-2"
             onClick={handleApplyNow}
           >
-            Apply Now
+            Apply
           </Button>
         </div>
       </div>

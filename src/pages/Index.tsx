@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/home/HeroSection";
 import FeatureCards from "@/components/home/FeatureCards";
 import JobCard from "@/components/jobs/JobCard";
+import Chatbot from "@/components/ui/Chatbot";
 import { ArrowRight, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -243,6 +244,8 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 };
