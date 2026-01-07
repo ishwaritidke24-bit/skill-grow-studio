@@ -1,24 +1,36 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Briefcase, User, Menu, X } from "lucide-react";
-import AuthModal from "@/components/ui/AuthModal";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Briefcase, User, Menu, X, LogOut } from "lucide-react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Jobs", path: "/jobs" },
-  { name: "Resume AI", path: "/resume" },
+  { name: "Students", path: "/students" },
   { name: "Learn", path: "/courses" },
-  { name: "Dashboard", path: "/dashboard" },
 ];
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, role, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const getDashboardLink = () => {
+    if (role === "admin") return "/admin";
+    if (role === "recruiter") return "/company";
+    return "/dashboard";
   };
 
   return (
@@ -63,14 +75,28 @@ const Navbar = () => {
 
             {/* Desktop Profile, Theme Toggle & Mobile Menu Toggle */}
             <div className="flex items-center gap-2">
+              {user && (
+                <Link
+                  to={getDashboardLink()}
+                  className="hidden md:flex nav-pill text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  Dashboard
+                </Link>
+              )}
               <ThemeToggle />
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 hover:scale-105 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="Open user menu"
-              >
-                <User className="w-5 h-5 text-muted-foreground" />
-              </button>
+              {user ? (
+                <button 
+                  onClick={handleSignOut}
+                  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 hover:scale-105 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="w-5 h-5 text-muted-foreground" />
+                </button>
+              ) : (
+                <Link to="/auth">
+                  <Button size="sm">Login</Button>
+                </Link>
+              )}
               
               {/* Mobile Menu Toggle */}
               <button
@@ -118,11 +144,6 @@ const Navbar = () => {
           </nav>
         </div>
       </header>
-
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </>
   );
 };
